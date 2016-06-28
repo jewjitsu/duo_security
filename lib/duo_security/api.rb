@@ -10,12 +10,22 @@ module DuoSecurity
     include HTTParty
     ssl_ca_file File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "data", "ca-bundle.crt"))
 
-    def initialize(host, secret_key, integration_key)
+    def initialize(host, secret_key, integration_key, api_version = 2)
       @host = host
       @skey = secret_key
       @ikey = integration_key
+      @api_version = api_version
 
-      self.class.base_uri "https://#{@host}/rest/v1"
+      case @api_version
+      when 1
+        @url_str = "rest"
+      when 2
+        @url_str = "auth"
+      else
+        "API version #{@api_version} not supported"
+      end
+
+      self.class.base_uri "https://#{@host}/#{@url_str}/v#{@api_version}"
     end
 
     def ping
@@ -24,7 +34,7 @@ module DuoSecurity
     end
 
     def check
-      auth = sign("get", @host, "/rest/v1/check", {}, @skey, @ikey)
+      auth = sign("get", @host, "/#{@url_str}/v#{@api_version}/check", {}, @skey, @ikey)
       response = self.class.get("/check", headers: {"Authorization" => auth})
 
       # TODO use parsed_response.fetch(...) when content-type is set correctly
@@ -51,7 +61,7 @@ module DuoSecurity
     protected
 
     def post(path, params = {})
-      auth = sign("post", @host, "/rest/v1#{path}", params, @skey, @ikey)
+      auth = sign("post", @host, "/#{@url_str}/v#{@api_version}#{path}", params, @skey, @ikey)
       self.class.post(path, headers: {"Authorization" => auth}, body: params)
     end
 

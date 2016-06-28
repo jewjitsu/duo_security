@@ -16,7 +16,9 @@ Gem::Specification.new do |gem|
   gem.version       = DuoSecurity::VERSION
 
   gem.add_dependency "httparty", "~> 0.10"
-  
-  gem.add_development_dependency "vcr", "~> 2.2.4"
+
+  gem.add_development_dependency "minitest"
+  gem.add_development_dependency "rake"
+  gem.add_development_dependency "vcr", "~> 2.4.0"
   gem.add_development_dependency "webmock", "~> 1.8.9"
 end
